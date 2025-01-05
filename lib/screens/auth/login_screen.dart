@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import '../../services/database_helper.dart';
-import '../home_screen.dart';
+import '../../provider/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -11,8 +14,25 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _navigateToRegister() {
+    // Clear inputs before navigating to Register Screen
+    _usernameController.clear();
+    _passwordController.clear();
+
+    // Navigate to Register Screen
+    Navigator.pushNamed(context, '/register');
+  }
+
   void _loginUser() async {
     final db = await DatabaseHelper.instance.database;
+
     final result = await db.query(
       'users',
       where: 'username = ? AND password = ?',
@@ -23,16 +43,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (result.isNotEmpty) {
-      final userId =
-          result.first['id'] as int; // Get the user's ID from the query
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              HomeScreen(userId: userId), // Pass userId to HomeScreen
-        ),
-      );
+      final userId = result.first['id'] as int;
+      final username = result.first['username'] as String;
+
+      // Update UserProvider
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.login(userId, username);
+
+      // Navigate to HomeScreen
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
+      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid Credentials')),
       );
@@ -64,9 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 20),
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/register');
-              },
+              onTap: _navigateToRegister,
               child: Text(
                 "Don't have an account? Register here",
                 style: TextStyle(

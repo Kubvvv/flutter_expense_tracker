@@ -62,6 +62,16 @@ class DatabaseHelper {
     return await db.insert('expenses', expense.toMap());
   }
 
+  Future<int> updateExpense(Expense expense) async {
+    final db = await database;
+    return await db.update(
+      'expenses',
+      expense.toMap(),
+      where: 'id = ?',
+      whereArgs: [expense.id],
+    );
+  }
+
   // Get all expenses from the database
   Future<List<Expense>> getExpensesForUser(int userId) async {
     final db = await database;

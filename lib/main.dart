@@ -9,15 +9,7 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home_screen.dart';
 
-// Database
-import 'services/database_helper.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize the database and print the path
-  final db = await DatabaseHelper.instance.database;
-
+void main() {
   runApp(MyApp());
 }
 
@@ -33,10 +25,23 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.blue),
         initialRoute: '/',
         routes: {
-          '/': (context) => LoginScreen(),
+          '/': (context) => const LoginScreen(),
           '/register': (context) => RegisterScreen(),
+          '/home': (context) => const HomeScreen(),
         },
       ),
+      builder: (context, child) {
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
+        final screenWidth = MediaQuery.of(context).size.width;
+
+        return Center(
+          child: Container(
+            width: isLandscape ? screenWidth * 0.9 : double.infinity,
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
