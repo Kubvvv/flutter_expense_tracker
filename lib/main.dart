@@ -9,7 +9,12 @@ import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+// Database
+import 'services/database_helper.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final db = await DatabaseHelper.instance.database;
   runApp(MyApp());
 }
 
